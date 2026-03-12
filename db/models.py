@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, Boolean, Enum, ForeignKey, DateTime
+from sqlalchemy import Column, Integer, String, Float, Boolean, Enum, ForeignKey, DateTime, Text
 from sqlalchemy.orm import relationship
 import enum
 from datetime import datetime
@@ -97,14 +97,49 @@ class Vehicle(Base):
     leasing_contract = relationship("LeasingContract", back_populates="vehicle", uselist=False)
 
 class LeasingContract(Base):
+    """
+    Contrat de Location Longue Durée (LLD).
+
+    Loyer ≈ (Prix d'achat − Valeur Résiduelle + Intérêts) / Nb mois
+    Le TCO (Total Cost of Ownership) intègre le loyer, l'énergie,
+    la fiscalité et les coûts indirects.
+    """
     __tablename__ = "leasing_contracts"
     id = Column(Integer, primary_key=True, index=True)
     vehicle_id = Column(Integer, ForeignKey("vehicles.id"), unique=True)
-    
-    monthly_fee = Column(Float, nullable=False)      # Loyer mensuel
-    max_monthly_km = Column(Integer, nullable=False) # Forfait km
-    penalty_per_km_eur = Column(Float, nullable=False)
-    
+
+    # ── 1. Loyer financier de base ──────────────────────────────────────────
+    contract_months = Column(Integer, nullable=False, default=36)    # Durée (mois)
+    max_monthly_km  = Column(Integer, nullable=False)                 # Forfait km/mois
+    annual_rate_pct = Column(Float,   nullable=False, default=4.5)   # Taux annuel (%)
+    monthly_fee     = Column(Float,   nullable=False)                 # Loyer calculé (€/mois)
+    penalty_per_km_eur = Column(Float, nullable=False)               # Pénalité dépassement km
+
+    # ── 2. Services LLD (leasing opérationnel) ──────────────────────────────
+    monthly_maintenance_eur     = Column(Float, default=0.0)  # Maintenance + pneumatiques
+    monthly_insurance_eur       = Column(Float, default=0.0)  # Assurance flotte (quote-part)
+    monthly_replacement_veh_eur = Column(Float, default=0.0)  # Véhicule de remplacement
+
+    # ── 3. Fiscalité ────────────────────────────────────────────────────────
+    # TVA : 100 % récupérable pour utilitaires, 50 % pour véhicules de tourisme
+    vat_recovery_pct            = Column(Float, default=100.0) # % TVA récupérable
+    # Taxe CO₂ annuelle (ex-TVS) — basée sur les émissions
+    co2_tax_annual_eur          = Column(Float, default=0.0)
+    # Taxe ancienneté annuelle (2ᵉ composante ex-TVS)
+    age_tax_annual_eur          = Column(Float, default=0.0)
+    # Amortissement Non Déductible : part du loyer non déductible fiscalement
+    non_deductible_pct          = Column(Float, default=0.0)   # % non déductible
+
+    # ── 4. TCO pré-calculé (snapshot mensuel) ───────────────────────────────
+    monthly_energy_eur          = Column(Float, default=0.0)   # Carburant / électricité
+    monthly_indirect_costs_eur  = Column(Float, default=0.0)   # Gestion, amendes, sinistralité
+    tco_monthly_eur             = Column(Float, nullable=True)  # TCO total calculé (€/mois)
+
+    # Métadonnées
+    notes      = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
     vehicle = relationship("Vehicle", back_populates="leasing_contract")
 
 class Parcel(Base):

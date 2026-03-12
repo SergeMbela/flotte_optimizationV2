@@ -15,6 +15,12 @@ cd belgian-fleet-optimizer
 # Créer et activer l'environnement virtuel
 python3 -m venv venv
 source venv/bin/activate
+```
 
+### 3. Documentation
+* [Analyse du TCO (Total Cost of Ownership)](ANALYSE_TCO.md)
+
+```bash
 # Installer les dépendances
 pip install -r requirements.txt
+```
