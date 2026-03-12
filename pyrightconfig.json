@@ -1,0 +1,14 @@
+{
+    "include": [
+        "."
+    ],
+    "extraPaths": [
+        ".",
+        "/home/sergembela/anaconda3/optimization_flotte"
+    ],
+    "pythonInterpreterPath": "/home/sergembela/anaconda3/bin/python3",
+    "venvPath": "/home/sergembela/anaconda3",
+    "venv": ".",
+    "pythonVersion": "3.11",
+    "typeCheckingMode": "basic"
+}

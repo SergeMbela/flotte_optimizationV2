@@ -1,0 +1,51 @@
+# ── Python ──────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# ── Virtual environments ─────────────────────────────────
+.venv/
+venv/
+env/
+.env/
+
+# ── Environment variables (secrets !) ────────────────────
+.env
+*.env
+
+# ── Bases de données locales ──────────────────────────────
+*.db
+*.sqlite
+*.sqlite3
+
+# ── Docker volumes / données persistées localement ───────
+postgres_data/
+pgdata/
+
+# ── Jupyter ───────────────────────────────────────────────
+.ipynb_checkpoints/
+*.ipynb
+
+# ── Tests & couverture ────────────────────────────────────
+.pytest_cache/
+.coverage
+htmlcov/
+
+# ── Pyright / mypy / ruff cache ───────────────────────────
+.pyright/
+.mypy_cache/
+.ruff_cache/
+
+# ── VS Code (garder pyrightconfig.json, ignorer le reste) ─
+.vscode/*
+!.vscode/extensions.json
+
+# ── OS ────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db

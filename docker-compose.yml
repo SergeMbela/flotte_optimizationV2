@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgis/postgis:15-3.3 # Image officielle PostgreSQL + PostGIS
+    container_name: fleet_db_container
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=fleet_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  adminer:
+    image: adminer
+    container_name: fleet_adminer
+    restart: always
+    ports:
+      - "8082:8082"
+
+volumes:
+  postgres_data:
