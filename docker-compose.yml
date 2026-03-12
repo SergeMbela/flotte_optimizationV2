@@ -19,7 +19,7 @@ services:
     container_name: fleet_adminer
     restart: always
     ports:
-      - "8082:8082"
+      - "8082:8080"
 
 volumes:
   postgres_data:
