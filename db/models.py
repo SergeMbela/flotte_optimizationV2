@@ -39,6 +39,10 @@ class LeaveStatus(str, enum.Enum):
     APPROVED = "APPROUVÉ"
     REJECTED = "REFUSÉ"
 
+class MileageEntryType(str, enum.Enum):
+    DEPOT_DEPARTURE = "DEPOT_DEPARTURE" # Départ du dépôt
+    LAST_DELIVERY = "LAST_DELIVERY"     # Dernière livraison
+
 # --- MODÈLES DE TABLES ---
 
 class Depot(Base):
@@ -66,6 +70,7 @@ class Driver(Base):
     
     # Relations
     leaves = relationship("Leave", back_populates="driver")
+    mileage_logs = relationship("MileageLog", back_populates="driver")
 
 class Leave(Base):
     """Gestion des absences chauffeurs"""
@@ -95,6 +100,7 @@ class Vehicle(Base):
     
     # Relation 1-to-1 avec le leasing
     leasing_contract = relationship("LeasingContract", back_populates="vehicle", uselist=False)
+    mileage_logs = relationship("MileageLog", back_populates="vehicle")
 
 class LeasingContract(Base):
     """
@@ -141,6 +147,20 @@ class LeasingContract(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     vehicle = relationship("Vehicle", back_populates="leasing_contract")
+
+class MileageLog(Base):
+    """Suivi des kilomètres par trajet journalier."""
+    __tablename__ = "mileage_logs"
+    id = Column(Integer, primary_key=True, index=True)
+    driver_id = Column(Integer, ForeignKey("drivers.id"), nullable=False)
+    vehicle_id = Column(Integer, ForeignKey("vehicles.id"), nullable=False)
+    
+    mileage = Column(Float, nullable=False)
+    entry_type = Column(Enum(MileageEntryType), nullable=False)
+    timestamp = Column(DateTime, default=datetime.utcnow)
+
+    driver = relationship("Driver", back_populates="mileage_logs")
+    vehicle = relationship("Vehicle", back_populates="mileage_logs")
 
 class Parcel(Base):
     __tablename__ = "parcels"

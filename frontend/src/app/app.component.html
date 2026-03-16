@@ -1,0 +1,131 @@
+<div class="min-h-screen bg-slate-950 text-slate-200 font-sans flex">
+  <!-- Sidebar -->
+  <aside class="w-64 bg-slate-900 border-r border-slate-800 flex flex-col hidden md:flex">
+    <div class="p-6">
+      <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">
+        FleetOptima</h1>
+    </div>
+    <nav class="flex-1 px-4 space-y-2 mt-4">
+      <a href="#" class="flex items-center space-x-3 p-3 bg-slate-800 rounded-lg text-white">
+        <span class="w-5 h-5 bg-blue-500 rounded-md"></span>
+        <span>Dashboard</span>
+      </a>
+      <a href="#" class="flex items-center space-x-3 p-3 hover:bg-slate-800 rounded-lg transition-colors">
+        <span class="w-5 h-5 bg-slate-700 rounded-md"></span>
+        <span>Vehicles</span>
+      </a>
+      <a href="#" class="flex items-center space-x-3 p-3 hover:bg-slate-800 rounded-lg transition-colors">
+        <span class="w-5 h-5 bg-slate-700 rounded-md"></span>
+        <span>Drivers</span>
+      </a>
+    </nav>
+    <div class="p-4 border-t border-slate-800 text-xs text-slate-500">
+      v1.0.0 Belgian Fleet Optimizer
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="flex-1 overflow-y-auto">
+    <!-- Header -->
+    <header
+      class="h-20 bg-slate-900/50 backdrop-blur-md border-b border-slate-800 flex items-center justify-between px-8 sticky top-0 z-10">
+      <h2 class="text-xl font-semibold">Overview</h2>
+      <div class="flex items-center space-x-4">
+        <button class="p-2 hover:bg-slate-800 rounded-full">
+          <span class="w-6 h-6 block bg-slate-700 rounded-full"></span>
+        </button>
+        <div class="w-10 h-10 bg-gradient-to-tr from-blue-500 to-emerald-500 rounded-full border-2 border-slate-800">
+        </div>
+      </div>
+    </header>
+
+    <div class="p-8 space-y-8">
+      <!-- Stats Row -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl">
+          <p class="text-slate-500 text-sm font-medium">Total Vehicles</p>
+          <h3 class="text-4xl font-bold mt-2">{{ vehicles.length }}</h3>
+          <div class="mt-4 flex items-center text-emerald-400 text-sm">
+            <span>↑ 12% from last month</span>
+          </div>
+        </div>
+        <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl">
+          <p class="text-slate-500 text-sm font-medium">Active Drivers</p>
+          <h3 class="text-4xl font-bold mt-2">{{ drivers.length }}</h3>
+          <div class="mt-4 flex items-center text-blue-400 text-sm">
+            <span>98% Utilization rate</span>
+          </div>
+        </div>
+        <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl">
+          <p class="text-slate-500 text-sm font-medium">Avg. Mileage</p>
+          <h3 class="text-4xl font-bold mt-2">1.2k km</h3>
+          <div class="mt-4 flex items-center text-slate-400 text-sm">
+            <span>Snapshot today</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tables Section -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Vehicles List -->
+        <section class="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden shadow-2xl">
+          <div class="p-6 border-b border-slate-800 flex justify-between items-center">
+            <h3 class="font-bold text-lg">Active Fleet</h3>
+            <button class="text-sm text-blue-400 font-medium">View All</button>
+          </div>
+          <div class="divide-y divide-slate-800">
+            <div *ngFor="let v of vehicles"
+              class="p-4 hover:bg-slate-800/50 transition-colors flex items-center justify-between">
+              <div class="flex items-center space-x-4">
+                <div class="w-12 h-12 bg-slate-800 rounded-xl flex items-center justify-center text-xl">
+                  🚚
+                </div>
+                <div>
+                  <h4 class="font-semibold">{{ v.license_plate }}</h4>
+                  <p class="text-xs text-slate-500">{{ v.engine_type }} • {{ v.capacity_m3 }}m³</p>
+                </div>
+              </div>
+              <span [class]="'px-3 py-1 rounded-full text-[10px] font-bold ' + 
+                (v.status === 'AVAILABLE' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500')">
+                {{ v.status }}
+              </span>
+            </div>
+            <div *ngIf="vehicles.length === 0" class="p-8 text-center text-slate-500">
+              No vehicles found.
+            </div>
+          </div>
+        </section>
+
+        <!-- Drivers List -->
+        <section class="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden shadow-2xl">
+          <div class="p-6 border-b border-slate-800 flex justify-between items-center">
+            <h3 class="font-bold text-lg">Drivers Status</h3>
+            <button class="text-sm text-blue-400 font-medium">Manage</button>
+          </div>
+          <div class="divide-y divide-slate-800">
+            <div *ngFor="let d of drivers"
+              class="p-4 hover:bg-slate-800/50 transition-colors flex items-center justify-between">
+              <div class="flex items-center space-x-4">
+                <div
+                  class="w-10 h-10 bg-slate-700 rounded-full flex items-center justify-center font-bold text-slate-300">
+                  {{ d.name.charAt(0) }}
+                </div>
+                <div>
+                  <h4 class="font-semibold text-sm">{{ d.name }}</h4>
+                  <p class="text-xs text-slate-500">{{ d.email }}</p>
+                </div>
+              </div>
+              <div class="text-right">
+                <p class="text-xs font-medium">{{ d.phone }}</p>
+                <p class="text-[10px] text-slate-600 truncate w-24">{{ d.home_address }}</p>
+              </div>
+            </div>
+            <div *ngIf="drivers.length === 0" class="p-8 text-center text-slate-500">
+              No drivers found.
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+</div>

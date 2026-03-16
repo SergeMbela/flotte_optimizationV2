@@ -6,9 +6,9 @@
         ".",
         "/home/sergembela/anaconda3/optimization_flotte"
     ],
-    "pythonInterpreterPath": "/home/sergembela/anaconda3/bin/python3",
-    "venvPath": "/home/sergembela/anaconda3",
-    "venv": ".",
+    "pythonInterpreterPath": "/home/sergembela/anaconda3/envs/optimization_flotte/bin/python",
+    "venvPath": "/home/sergembela/anaconda3/envs",
+    "venv": "optimization_flotte",
     "pythonVersion": "3.11",
     "typeCheckingMode": "basic"
 }

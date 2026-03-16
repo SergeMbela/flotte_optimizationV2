@@ -11,12 +11,14 @@ Usage:
 
 import argparse
 import sys
+from datetime import datetime
 
 from db.database import engine, SessionLocal
 from db.models import (
     Base,
     Depot, Driver, Vehicle, LeasingContract,
     Parcel, Competitor, CompetitorPrice,
+    MileageLog, MileageEntryType,
     EngineType, VehicleStatus, ParcelStatus, UrgencyLevel,
 )
 
@@ -75,6 +77,7 @@ def seed_db():
             ),
         ]
         db.add_all(drivers)
+        db.flush() # Pour avoir les IDs des chauffeurs
 
         # --- Véhicules ---
         van1 = Vehicle(
@@ -137,6 +140,24 @@ def seed_db():
                 urgency=UrgencyLevel.EXPRESS,
                 base_fee=7.00, per_kg_fee=1.20,
             ),
+        ])
+
+        # --- Journaux de kilométrage (MileageLog) ---
+        db.add_all([
+            MileageLog(
+                driver_id=drivers[0].id,
+                vehicle_id=van1.id,
+                mileage=120500.0,
+                entry_type=MileageEntryType.DEPOT_DEPARTURE,
+                timestamp=datetime.utcnow()
+            ),
+            MileageLog(
+                driver_id=drivers[0].id,
+                vehicle_id=van1.id,
+                mileage=120650.0,
+                entry_type=MileageEntryType.LAST_DELIVERY,
+                timestamp=datetime.utcnow()
+            )
         ])
 
         db.commit()
