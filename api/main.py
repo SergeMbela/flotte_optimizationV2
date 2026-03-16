@@ -15,12 +15,7 @@ app = FastAPI(
 # --- CORS Configuration ---
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:4200",
-        "http://127.0.0.1:4200",
-        "http://localhost",
-        "http://localhost:80",
-    ],
+    allow_origins=["http://localhost:4200"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -126,6 +121,11 @@ def read_leasing_contracts(skip: int = 0, limit: int = 100, db: Session = Depend
 @app.post("/leasing_contracts/", response_model=schemas.LeasingContract)
 def create_leasing_contract(contract: schemas.LeasingContractCreate, db: Session = Depends(get_db)):
     return crud.create_leasing_contract(db=db, contract=contract)
+
+@app.post("/leasing_contracts/recalculate/")
+def recalculate_tco(db: Session = Depends(get_db)):
+    count = crud.update_all_tco(db)
+    return {"message": f"TCO recalculated for {count} contracts"}
 
 # --- Competitors ---
 @app.get("/competitors/", response_model=List[schemas.Competitor])

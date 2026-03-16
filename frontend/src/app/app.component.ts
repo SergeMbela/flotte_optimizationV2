@@ -1,7 +1,7 @@
 import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { FleetService, Vehicle, Driver, VehicleModel, EngineType, VehicleStatus, Depot, Parcel, UrgencyLevel } from './fleet.service';
+import { FleetService, Vehicle, Driver, VehicleModel, EngineType, VehicleStatus, Depot, Parcel, UrgencyLevel, LeasingContract } from './fleet.service';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import Map from 'ol/Map';
@@ -28,6 +28,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   vehicleModels: VehicleModel[] = [];
   depots: Depot[] = [];
   parcels: Parcel[] = [];
+  leasingContracts: LeasingContract[] = [];
   currentView: string = 'dashboard';
 
   private map?: Map;
@@ -139,6 +140,7 @@ export class AppComponent implements OnInit, AfterViewInit {
         this.updateMapMarkers();
       }
     });
+    this.fleetService.getLeasingContracts().subscribe(data => this.leasingContracts = data);
   }
 
   setView(view: string): void {

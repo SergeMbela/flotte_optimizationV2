@@ -1,6 +1,8 @@
 from sqlalchemy.orm import Session
 from db import models
 from . import schemas
+from .services.tco_service import calculate_tco
+from .services.pricing_service import calculate_parcel_price
 
 # --- Depot CRUD ---
 def get_depots(db: Session, skip: int = 0, limit: int = 100):
@@ -91,9 +93,17 @@ def get_leasing_contracts(db: Session, skip: int = 0, limit: int = 100):
 def get_vehicle_leasing(db: Session, vehicle_id: int):
     return db.query(models.LeasingContract).filter(models.LeasingContract.vehicle_id == vehicle_id).first()
 
+def update_all_tco(db: Session):
+    contracts = db.query(models.LeasingContract).all()
+    for contract in contracts:
+        contract.tco_monthly_eur = calculate_tco(contract)
+    db.commit()
+    return len(contracts)
+
 def create_leasing_contract(db: Session, contract: schemas.LeasingContractCreate):
     db_contract = models.LeasingContract(**contract.model_dump())
-    # Note: TCO calculation would ideally happen here or in a service layer
+    # Note: TCO calculation happens here
+    db_contract.tco_monthly_eur = calculate_tco(db_contract)
     db.add(db_contract)
     db.commit()
     db.refresh(db_contract)
@@ -108,6 +118,11 @@ def get_parcels(db: Session, skip: int = 0, limit: int = 100):
 
 def create_parcel(db: Session, parcel: schemas.ParcelCreate):
     db_parcel = models.Parcel(**parcel.model_dump())
+    
+    # calculate price automatically if not provided
+    if db_parcel.price_charged is None:
+        db_parcel.price_charged = calculate_parcel_price(db, db_parcel.weight_kg, db_parcel.urgency)
+        
     db.add(db_parcel)
     db.commit()
     db.refresh(db_parcel)

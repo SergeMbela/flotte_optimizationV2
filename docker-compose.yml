@@ -24,6 +24,8 @@ services:
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/fleet_db
     ports:
       - "8000:8000"
+    volumes:
+      - .:/app
     depends_on:
       - db
 

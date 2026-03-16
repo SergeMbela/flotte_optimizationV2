@@ -529,11 +529,91 @@
 
         <!-- Finances Section -->
         <ng-container *ngIf="currentView === 'finances'">
-          <section class="bg-slate-900 rounded-2xl border border-slate-800 p-12 text-center shadow-2xl">
-            <div class="text-6xl mb-6">💰📈</div>
-            <h3 class="text-2xl font-bold mb-2">Analyses Financières</h3>
-            <p class="text-slate-500">Suivi des coûts et rentabilité.</p>
-          </section>
+          <div class="space-y-6">
+            <header class="flex justify-between items-center">
+              <div>
+                <h3 class="text-2xl font-bold">Analyses Financières</h3>
+                <p class="text-slate-500 text-sm">Gestion des contrats LLD et calcul du TCO</p>
+              </div>
+              <div class="flex space-x-3">
+                <button class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white text-sm font-semibold rounded-xl border border-slate-700 transition-all">
+                  Export Rapport
+                </button>
+                <button class="px-4 py-2 bg-amber-600 hover:bg-amber-500 text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-amber-900/20 active:scale-95">
+                  Nouveau Contrat
+                </button>
+              </div>
+            </header>
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl">
+                <p class="text-slate-500 text-xs font-bold uppercase tracking-wider">TCO Moyen / Véhicule</p>
+                <h4 class="text-2xl font-bold mt-2 text-amber-400">845 € <span class="text-xs text-slate-500">/ mois</span></h4>
+              </div>
+              <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl">
+                <p class="text-slate-500 text-xs font-bold uppercase tracking-wider">Flotte Totale</p>
+                <h4 class="text-2xl font-bold mt-2 text-blue-400">{{ leasingContracts.length }} <span class="text-xs text-slate-500">unités</span></h4>
+              </div>
+              <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl">
+                <p class="text-slate-500 text-xs font-bold uppercase tracking-wider">Dépenses Mensuelles</p>
+                <h4 class="text-2xl font-bold mt-2 text-emerald-400">12,4k €</h4>
+              </div>
+              <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl">
+                <p class="text-slate-500 text-xs font-bold uppercase tracking-wider">Vat Recovery</p>
+                <h4 class="text-2xl font-bold mt-2 text-indigo-400">100%</h4>
+              </div>
+            </div>
+
+            <section class="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden shadow-2xl">
+              <div class="p-6 border-b border-slate-800 bg-slate-900/50 flex justify-between items-center">
+                <h3 class="font-bold text-lg">Contrats de Leasing & TCO</h3>
+                <div class="text-xs font-medium text-slate-500">
+                  Snapshot: Mars 2026
+                </div>
+              </div>
+              <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                  <thead class="bg-slate-950/50 text-slate-400 uppercase text-[10px] font-bold tracking-widest">
+                    <tr>
+                      <th class="px-6 py-4">Véhicule</th>
+                      <th class="px-6 py-4">Loyer (LLD)</th>
+                      <th class="px-6 py-4">Services / Fiscalité</th>
+                      <th class="px-6 py-4">Énergie Est.</th>
+                      <th class="px-6 py-4 font-bold text-slate-200">TCO Mensuel</th>
+                      <th class="px-6 py-4 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-slate-800">
+                    <tr *ngFor="let c of leasingContracts" class="hover:bg-slate-800/30 transition-colors group">
+                      <td class="px-6 py-4">
+                        <div class="flex items-center space-x-3">
+                          <div class="w-8 h-8 bg-slate-800 rounded-lg flex items-center justify-center text-xs">🚚</div>
+                          <div>
+                            <p class="font-semibold text-sm">Veh. ID: #{{ c.vehicle_id }}</p>
+                            <p class="text-[10px] text-slate-500">{{ c.contract_months }} mois / {{ c.max_monthly_km }} km</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="px-6 py-4 font-medium text-sm">{{ c.monthly_fee }} €</td>
+                      <td class="px-6 py-4 text-sm text-slate-400">
+                        {{ (c.monthly_maintenance_eur + c.monthly_insurance_eur + c.monthly_replacement_veh_eur) }} €
+                        <span class="text-[10px] block">+ {{ (c.co2_tax_annual_eur + c.age_tax_annual_eur) / 12 | number:'1.2-2' }} € taxes</span>
+                      </td>
+                      <td class="px-6 py-4 text-sm text-slate-400">{{ c.monthly_energy_eur }} €</td>
+                      <td class="px-6 py-4 font-bold text-amber-400">{{ c.tco_monthly_eur | number:'1.2-2' }} €</td>
+                      <td class="px-6 py-4 text-right">
+                        <button class="p-2 text-slate-500 hover:text-blue-400 transition-colors">✏️</button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+                <div *ngIf="leasingContracts.length === 0" class="p-20 text-center text-slate-500">
+                  <div class="text-5xl mb-4">📑</div>
+                  <p>Aucun contrat de leasing enregistré.</p>
+                </div>
+              </div>
+            </section>
+          </div>
         </ng-container>
       </div>
     </div>
