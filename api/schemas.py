@@ -1,7 +1,7 @@
 from pydantic import BaseModel, ConfigDict
 from datetime import datetime
 from typing import Optional, List
-from db.models import EngineType, VehicleStatus, ParcelStatus, UrgencyLevel, MileageEntryType
+from db.models import EngineType, VehicleStatus, ParcelStatus, UrgencyLevel, MileageEntryType, LeaveType, LeaveStatus
 
 # --- Schemas for Base Models ---
 
@@ -35,6 +35,25 @@ class Driver(DriverBase):
     driven_minutes_today: int
     model_config = ConfigDict(from_attributes=True)
 
+# --- Leave Schemas ---
+class LeaveBase(BaseModel):
+    driver_id: int
+    leave_type: LeaveType
+    start_date: datetime
+    end_date: datetime
+    reason: Optional[str] = None
+
+class LeaveCreate(LeaveBase):
+    pass
+
+class LeaveUpdate(BaseModel):
+    status: LeaveStatus
+
+class Leave(LeaveBase):
+    id: int
+    status: LeaveStatus
+    model_config = ConfigDict(from_attributes=True)
+
 # --- Vehicle Schemas ---
 class VehicleBase(BaseModel):
     license_plate: str
@@ -49,6 +68,35 @@ class VehicleCreate(VehicleBase):
 
 class Vehicle(VehicleBase):
     id: int
+    model_config = ConfigDict(from_attributes=True)
+
+# --- Leasing Contract Schemas ---
+class LeasingContractBase(BaseModel):
+    vehicle_id: int
+    contract_months: int = 36
+    max_monthly_km: int
+    annual_rate_pct: float = 4.5
+    monthly_fee: float
+    penalty_per_km_eur: float
+    monthly_maintenance_eur: float = 0.0
+    monthly_insurance_eur: float = 0.0
+    monthly_replacement_veh_eur: float = 0.0
+    vat_recovery_pct: float = 100.0
+    co2_tax_annual_eur: float = 0.0
+    age_tax_annual_eur: float = 0.0
+    non_deductible_pct: float = 0.0
+    monthly_energy_eur: float = 0.0
+    monthly_indirect_costs_eur: float = 0.0
+    notes: Optional[str] = None
+
+class LeasingContractCreate(LeasingContractBase):
+    pass
+
+class LeasingContract(LeasingContractBase):
+    id: int
+    tco_monthly_eur: Optional[float] = None
+    created_at: datetime
+    updated_at: datetime
     model_config = ConfigDict(from_attributes=True)
 
 # --- Parcel Schemas ---
@@ -84,3 +132,30 @@ class MileageLog(MileageLogBase):
     id: int
     timestamp: datetime
     model_config = ConfigDict(from_attributes=True)
+
+# --- Competitor Schemas ---
+class CompetitorPriceBase(BaseModel):
+    urgency: UrgencyLevel
+    base_fee: float
+    per_kg_fee: float
+
+class CompetitorPriceCreate(CompetitorPriceBase):
+    competitor_id: int
+
+class CompetitorPrice(CompetitorPriceBase):
+    id: int
+    competitor_id: int
+    updated_at: datetime
+    model_config = ConfigDict(from_attributes=True)
+
+class CompetitorBase(BaseModel):
+    name: str
+
+class CompetitorCreate(CompetitorBase):
+    pass
+
+class Competitor(CompetitorBase):
+    id: int
+    prices: List[CompetitorPrice] = []
+    model_config = ConfigDict(from_attributes=True)
+

@@ -78,3 +78,42 @@ def read_mileage_logs(skip: int = 0, limit: int = 100, db: Session = Depends(get
 @app.post("/mileage_logs/", response_model=schemas.MileageLog)
 def create_mileage_log(log: schemas.MileageLogCreate, db: Session = Depends(get_db)):
     return crud.create_mileage_log(db=db, log=log)
+
+# --- Leaves ---
+@app.get("/leaves/", response_model=List[schemas.Leave])
+def read_leaves(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    return crud.get_leaves(db, skip=skip, limit=limit)
+
+@app.post("/leaves/", response_model=schemas.Leave)
+def create_leave(leave: schemas.LeaveCreate, db: Session = Depends(get_db)):
+    return crud.create_leave(db=db, leave=leave)
+
+@app.patch("/leaves/{leave_id}", response_model=schemas.Leave)
+def update_leave_status(leave_id: int, leave_update: schemas.LeaveUpdate, db: Session = Depends(get_db)):
+    db_leave = crud.update_leave_status(db, leave_id=leave_id, status=leave_update.status)
+    if db_leave is None:
+        raise HTTPException(status_code=404, detail="Leave not found")
+    return db_leave
+
+# --- Leasing Contracts ---
+@app.get("/leasing_contracts/", response_model=List[schemas.LeasingContract])
+def read_leasing_contracts(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    return crud.get_leasing_contracts(db, skip=skip, limit=limit)
+
+@app.post("/leasing_contracts/", response_model=schemas.LeasingContract)
+def create_leasing_contract(contract: schemas.LeasingContractCreate, db: Session = Depends(get_db)):
+    return crud.create_leasing_contract(db=db, contract=contract)
+
+# --- Competitors ---
+@app.get("/competitors/", response_model=List[schemas.Competitor])
+def read_competitors(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    return crud.get_competitors(db, skip=skip, limit=limit)
+
+@app.post("/competitors/", response_model=schemas.Competitor)
+def create_competitor(competitor: schemas.CompetitorCreate, db: Session = Depends(get_db)):
+    return crud.create_competitor(db=db, competitor=competitor)
+
+@app.post("/competitor_prices/", response_model=schemas.CompetitorPrice)
+def create_competitor_price(price: schemas.CompetitorPriceCreate, db: Session = Depends(get_db)):
+    return crud.create_competitor_price(db=db, price=price)
+
