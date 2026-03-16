@@ -14,6 +14,30 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  backend:
+    build:
+      context: .
+      dockerfile: backend.Dockerfile
+    container_name: fleet_backend
+    restart: always
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/fleet_db
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend.Dockerfile
+    container_name: fleet_frontend
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
   adminer:
     image: adminer
     container_name: fleet_adminer

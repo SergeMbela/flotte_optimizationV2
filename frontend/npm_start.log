@@ -1,0 +1,5 @@
+'\\wsl.localhost\Ubuntu\home\sergembela\anaconda3\optimization_flotte\frontend'
+CMD.EXE a ‚t‚ d‚marr‚ avec le chemin d'accŠs comme r‚pertoire en
+cours. Les chemins d'accŠs UNC ne sont pas prise en charge. Utilisation
+du r‚pertoire Windows par d‚faut.
+[1m[31mError: This command is not available when running the Angular CLI outside a workspace.[39m[22m
