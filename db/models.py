@@ -86,10 +86,21 @@ class Leave(Base):
     
     driver = relationship("Driver", back_populates="leaves")
 
+class VehicleModel(Base):
+    __tablename__ = "vehicle_models"
+    id = Column(Integer, primary_key=True, index=True)
+    brand = Column(String, nullable=False, index=True)
+    model_name = Column(String, nullable=False, index=True)
+
+    vehicles = relationship("Vehicle", back_populates="vehicle_model")
+
 class Vehicle(Base):
     __tablename__ = "vehicles"
     id = Column(Integer, primary_key=True, index=True)
     license_plate = Column(String, unique=True, index=True) # Plaque belge
+    
+    model_id = Column(Integer, ForeignKey("vehicle_models.id"), nullable=True)
+    
     engine_type = Column(Enum(EngineType), nullable=False)
     status = Column(Enum(VehicleStatus), default=VehicleStatus.AVAILABLE)
     
@@ -101,6 +112,7 @@ class Vehicle(Base):
     # Relation 1-to-1 avec le leasing
     leasing_contract = relationship("LeasingContract", back_populates="vehicle", uselist=False)
     mileage_logs = relationship("MileageLog", back_populates="vehicle")
+    vehicle_model = relationship("VehicleModel", back_populates="vehicles")
 
 class LeasingContract(Base):
     """
@@ -177,6 +189,8 @@ class Parcel(Base):
     # Statut et Dates (pour historique 30j)
     status = Column(Enum(ParcelStatus), default=ParcelStatus.PENDING)
     delivery_address = Column(String, nullable=False)
+    lat = Column(Float)
+    lon = Column(Float)
     created_at = Column(DateTime, default=datetime.utcnow)
 
 class Competitor(Base):

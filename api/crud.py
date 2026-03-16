@@ -2,6 +2,38 @@ from sqlalchemy.orm import Session
 from db import models
 from . import schemas
 
+# --- Depot CRUD ---
+def get_depots(db: Session, skip: int = 0, limit: int = 100):
+    return db.query(models.Depot).offset(skip).limit(limit).all()
+
+def create_depot(db: Session, depot: schemas.DepotCreate):
+    db_depot = models.Depot(**depot.model_dump())
+    db.add(db_depot)
+    db.commit()
+    db.refresh(db_depot)
+    return db_depot
+
+def delete_depot(db: Session, depot_id: int):
+    db_depot = db.query(models.Depot).filter(models.Depot.id == depot_id).first()
+    if db_depot:
+        db.delete(db_depot)
+        db.commit()
+    return db_depot
+
+# --- Vehicle Model CRUD ---
+def get_vehicle_model(db: Session, model_id: int):
+    return db.query(models.VehicleModel).filter(models.VehicleModel.id == model_id).first()
+
+def get_vehicle_models(db: Session, skip: int = 0, limit: int = 100):
+    return db.query(models.VehicleModel).offset(skip).limit(limit).all()
+
+def create_vehicle_model(db: Session, model: schemas.VehicleModelCreate):
+    db_model = models.VehicleModel(**model.model_dump())
+    db.add(db_model)
+    db.commit()
+    db.refresh(db_model)
+    return db_model
+
 # --- Vehicle CRUD ---
 def get_vehicle(db: Session, vehicle_id: int):
     return db.query(models.Vehicle).filter(models.Vehicle.id == vehicle_id).first()

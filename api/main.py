@@ -15,7 +15,12 @@ app = FastAPI(
 # --- CORS Configuration ---
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # For development, allow all. Change to specific origins in production.
+    allow_origins=[
+        "http://localhost:4200",
+        "http://127.0.0.1:4200",
+        "http://localhost",
+        "http://localhost:80",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -24,6 +29,24 @@ app.add_middleware(
 @app.get("/")
 def read_root():
     return {"message": "Welcome to Belgian Fleet Optimizer API"}
+
+# --- Depots ---
+@app.get("/depots/", response_model=List[schemas.Depot])
+def read_depots(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    return crud.get_depots(db, skip=skip, limit=limit)
+
+@app.post("/depots/", response_model=schemas.Depot)
+def create_depot(depot: schemas.DepotCreate, db: Session = Depends(get_db)):
+    return crud.create_depot(db=db, depot=depot)
+
+# --- Vehicle Models ---
+@app.get("/vehicle_models/", response_model=List[schemas.VehicleModel])
+def read_vehicle_models(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    return crud.get_vehicle_models(db, skip=skip, limit=limit)
+
+@app.post("/vehicle_models/", response_model=schemas.VehicleModel)
+def create_vehicle_model(model: schemas.VehicleModelCreate, db: Session = Depends(get_db)):
+    return crud.create_vehicle_model(db=db, model=model)
 
 # --- Vehicles ---
 @app.get("/vehicles/", response_model=List[schemas.Vehicle])

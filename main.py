@@ -16,7 +16,7 @@ from datetime import datetime
 from db.database import engine, SessionLocal
 from db.models import (
     Base,
-    Depot, Driver, Vehicle, LeasingContract,
+    Depot, Driver, VehicleModel, Vehicle, LeasingContract,
     Parcel, Competitor, CompetitorPrice,
     MileageLog, MileageEntryType,
     EngineType, VehicleStatus, ParcelStatus, UrgencyLevel,
@@ -32,6 +32,13 @@ def init_db():
     print("📦 Création des tables en base de données...")
     Base.metadata.create_all(bind=engine)
     print("✅ Tables créées avec succès.")
+
+
+def drop_db():
+    """Supprime toutes les tables définies dans models.py."""
+    print("⚠️  Suppression des tables en base de données...")
+    Base.metadata.drop_all(bind=engine)
+    print("✅ Tables supprimées.")
 
 
 # ---------------------------------------------------------------------------
@@ -79,9 +86,19 @@ def seed_db():
         db.add_all(drivers)
         db.flush() # Pour avoir les IDs des chauffeurs
 
+        # --- Modèles de véhicules ---
+        v_models = [
+            VehicleModel(brand="Renault", model_name="Master"),
+            VehicleModel(brand="Tesla",   model_name="Model 3"),
+            VehicleModel(brand="Mercedes", model_name="Sprinter"),
+        ]
+        db.add_all(v_models)
+        db.flush()
+
         # --- Véhicules ---
         van1 = Vehicle(
             license_plate="1-ABC-123",
+            model_id=v_models[0].id,
             engine_type=EngineType.DIESEL,
             status=VehicleStatus.AVAILABLE,
             capacity_m3=12.5,
@@ -90,6 +107,7 @@ def seed_db():
         )
         van2 = Vehicle(
             license_plate="2-XYZ-456",
+            model_id=v_models[1].id,
             engine_type=EngineType.ELECTRIC,
             status=VehicleStatus.AVAILABLE,
             capacity_m3=10.0,
@@ -178,8 +196,12 @@ def seed_db():
 def main():
     parser = argparse.ArgumentParser(description="Belgian Fleet Optimizer")
     parser.add_argument("--init-db", action="store_true", help="Crée les tables SQL")
+    parser.add_argument("--drop-db", action="store_true", help="Supprime toutes les tables")
     parser.add_argument("--seed",    action="store_true", help="Insère des données de test")
     args = parser.parse_args()
+
+    if args.drop_db:
+        drop_db()
 
     # Toujours s'assurer que les tables existent
     init_db()

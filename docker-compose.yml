@@ -37,6 +37,26 @@ services:
       - "80:80"
     depends_on:
       - backend
+    profiles:
+      - prod
+
+  frontend-dev:
+    build:
+      context: .
+      dockerfile: frontend.dev.Dockerfile
+    container_name: fleet_frontend_dev
+    restart: always
+    ports:
+      - "4200:4200"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    profiles:
+      - dev
 
   adminer:
     image: adminer

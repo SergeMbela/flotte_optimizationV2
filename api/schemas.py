@@ -54,9 +54,22 @@ class Leave(LeaveBase):
     status: LeaveStatus
     model_config = ConfigDict(from_attributes=True)
 
+# --- Vehicle Model Schemas ---
+class VehicleModelBase(BaseModel):
+    brand: str
+    model_name: str
+
+class VehicleModelCreate(VehicleModelBase):
+    pass
+
+class VehicleModel(VehicleModelBase):
+    id: int
+    model_config = ConfigDict(from_attributes=True)
+
 # --- Vehicle Schemas ---
 class VehicleBase(BaseModel):
     license_plate: str
+    model_id: Optional[int] = None
     engine_type: EngineType
     status: VehicleStatus = VehicleStatus.AVAILABLE
     capacity_m3: float
@@ -68,6 +81,7 @@ class VehicleCreate(VehicleBase):
 
 class Vehicle(VehicleBase):
     id: int
+    vehicle_model: Optional[VehicleModel] = None
     model_config = ConfigDict(from_attributes=True)
 
 # --- Leasing Contract Schemas ---
@@ -107,6 +121,8 @@ class ParcelBase(BaseModel):
     height_cm: Optional[float] = None
     urgency: UrgencyLevel = UrgencyLevel.STANDARD
     delivery_address: str
+    lat: Optional[float] = None
+    lon: Optional[float] = None
 
 class ParcelCreate(ParcelBase):
     pass

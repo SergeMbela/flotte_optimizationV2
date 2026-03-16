@@ -6,17 +6,29 @@
         FleetOptima</h1>
     </div>
     <nav class="flex-1 px-4 space-y-2 mt-4">
-      <a href="#" class="flex items-center space-x-3 p-3 bg-slate-800 rounded-lg text-white">
+      <a (click)="setView('dashboard')" [class.bg-slate-800]="currentView === 'dashboard'" [class.text-white]="currentView === 'dashboard'" class="flex items-center space-x-3 p-3 hover:bg-slate-800 rounded-lg transition-colors cursor-pointer">
         <span class="w-5 h-5 bg-blue-500 rounded-md"></span>
         <span>Dashboard</span>
       </a>
-      <a href="#" class="flex items-center space-x-3 p-3 hover:bg-slate-800 rounded-lg transition-colors">
-        <span class="w-5 h-5 bg-slate-700 rounded-md"></span>
-        <span>Vehicles</span>
+      <a (click)="setView('maps')" [class.bg-slate-800]="currentView === 'maps'" [class.text-white]="currentView === 'maps'" class="flex items-center space-x-3 p-3 hover:bg-slate-800 rounded-lg transition-colors cursor-pointer">
+        <span class="w-5 h-5 bg-emerald-500 rounded-md"></span>
+        <span>Maps</span>
       </a>
-      <a href="#" class="flex items-center space-x-3 p-3 hover:bg-slate-800 rounded-lg transition-colors">
+      <a (click)="setView('vehicles')" [class.bg-slate-800]="currentView === 'vehicles'" [class.text-white]="currentView === 'vehicles'" class="flex items-center space-x-3 p-3 hover:bg-slate-800 rounded-lg transition-colors cursor-pointer">
+        <span class="w-5 h-5 bg-slate-700 rounded-md"></span>
+        <span>Véhicules</span>
+      </a>
+      <a (click)="setView('drivers')" [class.bg-slate-800]="currentView === 'drivers'" [class.text-white]="currentView === 'drivers'" class="flex items-center space-x-3 p-3 hover:bg-slate-800 rounded-lg transition-colors cursor-pointer">
         <span class="w-5 h-5 bg-slate-700 rounded-md"></span>
         <span>Drivers</span>
+      </a>
+      <a (click)="setView('tournees')" [class.bg-slate-800]="currentView === 'tournees'" [class.text-white]="currentView === 'tournees'" class="flex items-center space-x-3 p-3 hover:bg-slate-800 rounded-lg transition-colors cursor-pointer">
+        <span class="w-5 h-5 bg-purple-500 rounded-md"></span>
+        <span>Tournées</span>
+      </a>
+      <a (click)="setView('finances')" [class.bg-slate-800]="currentView === 'finances'" [class.text-white]="currentView === 'finances'" class="flex items-center space-x-3 p-3 hover:bg-slate-800 rounded-lg transition-colors cursor-pointer">
+        <span class="w-5 h-5 bg-amber-500 rounded-md"></span>
+        <span>Finances</span>
       </a>
     </nav>
     <div class="p-4 border-t border-slate-800 text-xs text-slate-500">
@@ -29,7 +41,7 @@
     <!-- Header -->
     <header
       class="h-20 bg-slate-900/50 backdrop-blur-md border-b border-slate-800 flex items-center justify-between px-8 sticky top-0 z-10">
-      <h2 class="text-xl font-semibold">Overview</h2>
+      <h2 class="text-xl font-semibold capitalize">{{ currentView === 'tournees' ? 'Tournées' : currentView }}</h2>
       <div class="flex items-center space-x-4">
         <button class="p-2 hover:bg-slate-800 rounded-full">
           <span class="w-6 h-6 block bg-slate-700 rounded-full"></span>
@@ -39,9 +51,93 @@
       </div>
     </header>
 
+    <!-- Map Section -->
+    <div *ngIf="currentView === 'dashboard' || currentView === 'maps'" class="px-8 pt-8">
+      <div class="bg-slate-900 rounded-2xl border border-slate-800 shadow-2xl overflow-hidden relative group">
+        <div class="absolute top-4 left-4 z-[1000] bg-slate-900/80 backdrop-blur-md px-4 py-2 rounded-xl border border-slate-800 text-xs font-bold text-slate-300 shadow-xl">
+          📍 Fleet Depots Map
+        </div>
+        <div id="map" class="w-full" [ngClass]="currentView === 'maps' ? 'h-[600px]' : 'h-[400px]'"></div>
+      </div>
+    </div>
+
+    <!-- Depots Management -->
+    <div *ngIf="currentView === 'maps'" class="px-8 pt-8">
+      <section class="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden shadow-2xl flex flex-col">
+        <div class="p-6 border-b border-slate-800 flex justify-between items-center bg-slate-900/50">
+          <h3 class="font-bold text-lg">Depots Management</h3>
+          <button (click)="showDepotForm = !showDepotForm"
+                  class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-emerald-900/20 active:scale-95">
+            {{ showDepotForm ? 'Cancel' : 'Add Depot' }}
+          </button>
+        </div>
+
+        <!-- Add Depot Form -->
+        <div *ngIf="showDepotForm" class="p-6 border-b border-slate-800 bg-emerald-800/10">
+          <form (ngSubmit)="onSubmitDepot()" #depotForm="ngForm" class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div class="space-y-2">
+                <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Depot Name / Address</label>
+                <div class="flex space-x-2">
+                  <input type="text" [(ngModel)]="newDepot.name" name="name" required
+                         (ngModelChange)="onDepotAddressChange($event)"
+                         placeholder="e.g. Grand Place, Brussels"
+                         class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all">
+                  <button type="button" (click)="onGeocodeDepot()" 
+                          class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl border border-slate-700 transition-colors">
+                    🔍
+                  </button>
+                </div>
+              </div>
+              <div class="space-y-2">
+                <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Latitude</label>
+                <input type="number" step="any" [(ngModel)]="newDepot.lat" name="lat" required
+                       class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all">
+              </div>
+              <div class="space-y-2">
+                <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Longitude</label>
+                <input type="number" step="any" [(ngModel)]="newDepot.lon" name="lon" required
+                       class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all">
+              </div>
+            </div>
+            <button type="submit" [disabled]="!depotForm.form.valid"
+                    class="w-full py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-all shadow-xl shadow-emerald-900/10">
+              Register New Depot
+            </button>
+          </form>
+        </div>
+
+        <div class="divide-y divide-slate-800 overflow-x-auto">
+          <table class="w-full text-left">
+            <thead class="bg-slate-950/50 text-slate-400 uppercase text-[10px] font-bold tracking-widest">
+              <tr>
+                <th class="px-6 py-4">Name</th>
+                <th class="px-6 py-4">Latitude</th>
+                <th class="px-6 py-4">Longitude</th>
+                <th class="px-6 py-4">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800">
+              <tr *ngFor="let d of depots" class="hover:bg-slate-800/30 transition-colors">
+                <td class="px-6 py-4 font-semibold">{{ d.name }}</td>
+                <td class="px-6 py-4 text-slate-400 text-sm">{{ d.lat }}</td>
+                <td class="px-6 py-4 text-slate-400 text-sm">{{ d.lon }}</td>
+                <td class="px-6 py-4">
+                  <button class="text-slate-500 hover:text-red-400 transition-colors">🗑️</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div *ngIf="depots.length === 0" class="p-12 text-center text-slate-500">
+            No depots registered yet.
+          </div>
+        </div>
+      </section>
+    </div>
+
     <div class="p-8 space-y-8">
       <!-- Stats Row -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div *ngIf="currentView === 'dashboard'" class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl">
           <p class="text-slate-500 text-sm font-medium">Total Vehicles</p>
           <h3 class="text-4xl font-bold mt-2">{{ vehicles.length }}</h3>
@@ -66,65 +162,379 @@
       </div>
 
       <!-- Tables Section -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <!-- Vehicles List -->
-        <section class="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden shadow-2xl">
-          <div class="p-6 border-b border-slate-800 flex justify-between items-center">
-            <h3 class="font-bold text-lg">Active Fleet</h3>
-            <button class="text-sm text-blue-400 font-medium">View All</button>
-          </div>
-          <div class="divide-y divide-slate-800">
-            <div *ngFor="let v of vehicles"
-              class="p-4 hover:bg-slate-800/50 transition-colors flex items-center justify-between">
-              <div class="flex items-center space-x-4">
-                <div class="w-12 h-12 bg-slate-800 rounded-xl flex items-center justify-center text-xl">
-                  🚚
-                </div>
-                <div>
-                  <h4 class="font-semibold">{{ v.license_plate }}</h4>
-                  <p class="text-xs text-slate-500">{{ v.engine_type }} • {{ v.capacity_m3 }}m³</p>
-                </div>
-              </div>
-              <span [class]="'px-3 py-1 rounded-full text-[10px] font-bold ' + 
-                (v.status === 'AVAILABLE' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500')">
-                {{ v.status }}
-              </span>
+      <div class="grid grid-cols-1 gap-8" [ngClass]="currentView === 'dashboard' ? 'lg:grid-cols-2' : ''">
+        <!-- Vehicles View -->
+        <ng-container *ngIf="currentView === 'vehicles' || currentView === 'dashboard'">
+          <!-- Vehicle Models & Form -->
+          <section class="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden shadow-2xl flex flex-col">
+            <div class="p-6 border-b border-slate-800 flex justify-between items-center bg-slate-900/50">
+              <h3 class="font-bold text-lg">Vehicle Brands & Models</h3>
+              <button (click)="showForm = !showForm" 
+                      class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-blue-900/20 active:scale-95">
+                {{ showForm ? 'Cancel' : 'Add Brand' }}
+              </button>
             </div>
-            <div *ngIf="vehicles.length === 0" class="p-8 text-center text-slate-500">
-              No vehicles found.
-            </div>
-          </div>
-        </section>
 
-        <!-- Drivers List -->
-        <section class="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden shadow-2xl">
-          <div class="p-6 border-b border-slate-800 flex justify-between items-center">
-            <h3 class="font-bold text-lg">Drivers Status</h3>
-            <button class="text-sm text-blue-400 font-medium">Manage</button>
-          </div>
-          <div class="divide-y divide-slate-800">
-            <div *ngFor="let d of drivers"
-              class="p-4 hover:bg-slate-800/50 transition-colors flex items-center justify-between">
-              <div class="flex items-center space-x-4">
-                <div
-                  class="w-10 h-10 bg-slate-700 rounded-full flex items-center justify-center font-bold text-slate-300">
-                  {{ d.name.charAt(0) }}
+            <!-- Add Model Form -->
+            <div *ngIf="showForm" class="p-6 border-b border-slate-800 bg-slate-800/20">
+              <form (ngSubmit)="onSubmitModel()" #modelForm="ngForm" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div class="space-y-2">
+                    <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Brand Name</label>
+                    <input type="text" [(ngModel)]="newModel.brand" name="brand" required
+                           placeholder="e.g. Renault, Tesla"
+                           class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all">
+                  </div>
+                  <div class="space-y-2">
+                    <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Model Name</label>
+                    <input type="text" [(ngModel)]="newModel.model_name" name="model_name" required
+                           placeholder="e.g. Master, Model 3"
+                           class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all">
+                  </div>
                 </div>
-                <div>
-                  <h4 class="font-semibold text-sm">{{ d.name }}</h4>
-                  <p class="text-xs text-slate-500">{{ d.email }}</p>
+                <button type="submit" [disabled]="!modelForm.form.valid"
+                        class="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-all shadow-xl shadow-blue-900/10">
+                  Confirm Brand Registration
+                </button>
+              </form>
+            </div>
+
+            <!-- Models List -->
+            <div class="divide-y divide-slate-800 max-h-[400px] overflow-y-auto">
+              <div *ngFor="let m of vehicleModels"
+                class="p-4 hover:bg-slate-800/50 transition-colors flex items-center justify-between group">
+                <div class="flex items-center space-x-4">
+                  <div class="w-10 h-10 bg-slate-800 group-hover:bg-blue-600/10 border border-slate-700 group-hover:border-blue-500/30 rounded-xl flex items-center justify-center text-lg transition-colors">
+                    🔖
+                  </div>
+                  <div>
+                    <h4 class="font-semibold text-slate-100">{{ m.brand }}</h4>
+                    <p class="text-xs text-slate-500">{{ m.model_name }}</p>
+                  </div>
+                </div>
+                <div class="opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button class="p-2 text-slate-500 hover:text-red-400">
+                    <span class="w-4 h-4 block">🗑️</span>
+                  </button>
                 </div>
               </div>
-              <div class="text-right">
-                <p class="text-xs font-medium">{{ d.phone }}</p>
-                <p class="text-[10px] text-slate-600 truncate w-24">{{ d.home_address }}</p>
+              <div *ngIf="vehicleModels.length === 0" class="p-12 text-center">
+                <div class="text-4xl mb-3">🏷️</div>
+                <p class="text-slate-500 text-sm">No brands registered yet.</p>
               </div>
             </div>
-            <div *ngIf="drivers.length === 0" class="p-8 text-center text-slate-500">
-              No drivers found.
+          </section>
+
+          <!-- Vehicles List -->
+          <section class="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden shadow-2xl flex flex-col">
+            <div class="p-6 border-b border-slate-800 flex justify-between items-center bg-slate-900/50">
+              <h3 class="font-bold text-lg">Active Fleet</h3>
+              <div class="flex space-x-2">
+                <button (click)="showVehicleForm = !showVehicleForm"
+                        class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-emerald-900/20 active:scale-95">
+                  {{ showVehicleForm ? 'Cancel' : 'Add Vehicle' }}
+                </button>
+                <button class="text-sm text-blue-400 font-medium hover:text-blue-300">View All</button>
+              </div>
             </div>
-          </div>
-        </section>
+
+            <!-- Add Vehicle Form -->
+            <div *ngIf="showVehicleForm" class="p-6 border-b border-slate-800 bg-slate-800/20">
+              <form (ngSubmit)="onSubmitVehicle()" #vehicleForm="ngForm" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div class="space-y-2">
+                    <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">License Plate</label>
+                    <input type="text" [(ngModel)]="newVehicle.license_plate" name="license_plate" required
+                           placeholder="e.g. 1-ABC-123"
+                           class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all">
+                  </div>
+                  <div class="space-y-2">
+                    <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Model</label>
+                    <select [(ngModel)]="newVehicle.model_id" name="model_id" required
+                            class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all">
+                      <option [ngValue]="undefined" disabled selected>Select Model</option>
+                      <option *ngFor="let m of vehicleModels" [value]="m.id">{{ m.brand }} {{ m.model_name }}</option>
+                    </select>
+                  </div>
+                  <div class="space-y-2">
+                    <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Engine Type</label>
+                    <select [(ngModel)]="newVehicle.engine_type" name="engine_type" required
+                            class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all">
+                      <option *ngFor="let type of engineTypes" [value]="type">{{ type }}</option>
+                    </select>
+                  </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <div class="space-y-2">
+                    <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Status</label>
+                    <select [(ngModel)]="newVehicle.status" name="status" required
+                            class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all">
+                      <option *ngFor="let s of vehicleStatuses" [value]="s">{{ s }}</option>
+                    </select>
+                  </div>
+                  <div class="space-y-2">
+                    <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Capacity (m³)</label>
+                    <input type="number" [(ngModel)]="newVehicle.capacity_m3" name="capacity_m3" required
+                           class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all">
+                  </div>
+                  <div class="space-y-2">
+                    <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Price (€)</label>
+                    <input type="number" [(ngModel)]="newVehicle.purchase_price" name="purchase_price" required
+                           class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all">
+                  </div>
+                  <div class="space-y-2">
+                    <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Residual (€)</label>
+                    <input type="number" [(ngModel)]="newVehicle.estimated_residual_value" name="estimated_residual_value" required
+                           class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all">
+                  </div>
+                </div>
+
+                <button type="submit" [disabled]="!vehicleForm.form.valid"
+                        class="w-full py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-all shadow-xl shadow-emerald-900/10">
+                  Register New Vehicle
+                </button>
+              </form>
+            </div>
+            <div class="divide-y divide-slate-800 max-h-[400px] overflow-y-auto">
+              <div *ngFor="let v of vehicles"
+                class="p-4 hover:bg-slate-800/50 transition-colors flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                  <div class="w-12 h-12 bg-slate-800 border border-slate-700 rounded-xl flex items-center justify-center text-xl">
+                    🚚
+                  </div>
+                  <div>
+                    <h4 class="font-semibold">{{ v.license_plate }}</h4>
+                    <p class="text-xs text-slate-500">{{ v.engine_type }} • {{ v.capacity_m3 }}m³</p>
+                  </div>
+                </div>
+                <span [class]="'px-3 py-1 rounded-full text-[10px] font-bold ' + 
+                  (v.status === 'AVAILABLE' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500')">
+                  {{ v.status }}
+                </span>
+              </div>
+              <div *ngIf="vehicles.length === 0" class="p-12 text-center text-slate-500">
+                No vehicles found.
+              </div>
+            </div>
+          </section>
+        </ng-container>
+
+        <!-- Drivers Section -->
+        <ng-container *ngIf="currentView === 'drivers' || currentView === 'dashboard'">
+          <section class="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden shadow-2xl" [ngClass]="currentView === 'drivers' ? 'lg:col-span-2' : ''">
+            <div class="p-6 border-b border-slate-800 flex justify-between items-center">
+              <h3 class="font-bold text-lg">Drivers Status</h3>
+              <div class="flex space-x-2">
+                <button (click)="showDriverForm = !showDriverForm"
+                        class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-indigo-900/20 active:scale-95">
+                  {{ showDriverForm ? 'Cancel' : 'Add Driver' }}
+                </button>
+                <button class="text-sm text-blue-400 font-medium">Manage</button>
+              </div>
+            </div>
+
+            <!-- Add Driver Form -->
+            <div *ngIf="showDriverForm" class="p-6 border-b border-slate-800 bg-slate-800/20">
+              <form (ngSubmit)="onSubmitDriver()" #driverForm="ngForm" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div class="space-y-2">
+                    <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Full Name</label>
+                    <input type="text" [(ngModel)]="newDriver.name" name="name" required
+                           placeholder="e.g. Jean Dupont"
+                           class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all">
+                  </div>
+                  <div class="space-y-2">
+                    <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Email Address</label>
+                    <input type="email" [(ngModel)]="newDriver.email" name="email"
+                           placeholder="e.g. jean.dupont@example.com"
+                           class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all">
+                  </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div class="space-y-2">
+                    <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Phone Number</label>
+                    <input type="tel" [(ngModel)]="newDriver.phone" name="phone"
+                           placeholder="e.g. +32 477 11 22 33"
+                           class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all">
+                  </div>
+                  <div class="space-y-2 md:col-span-2">
+                    <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Home Address</label>
+                    <input type="text" [(ngModel)]="newDriver.home_address" name="home_address"
+                           placeholder="e.g. Rue de la Loi 1, 1000 Bruxelles"
+                           class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all">
+                  </div>
+                </div>
+
+                <div class="flex items-center space-x-3">
+                  <input type="checkbox" [(ngModel)]="newDriver.takes_van_home" name="takes_van_home"
+                         id="takes_van_home"
+                         class="w-4 h-4 bg-slate-950 border-slate-700 rounded text-indigo-600 focus:ring-indigo-500">
+                  <label for="takes_van_home" class="text-sm text-slate-300">Driver takes van home (ATN)</label>
+                </div>
+
+                <button type="submit" [disabled]="!driverForm.form.valid"
+                        class="w-full py-3 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-all shadow-xl shadow-indigo-900/10">
+                  Register New Driver
+                </button>
+              </form>
+            </div>
+            <div class="divide-y divide-slate-800">
+              <div *ngFor="let d of drivers"
+                class="p-4 hover:bg-slate-800/50 transition-colors flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                  <div
+                    class="w-10 h-10 bg-slate-700 rounded-full flex items-center justify-center font-bold text-slate-300">
+                    {{ d.name.charAt(0) }}
+                  </div>
+                  <div>
+                    <h4 class="font-semibold text-sm">{{ d.name }}</h4>
+                    <p class="text-xs text-slate-500">{{ d.email }}</p>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <p class="text-xs font-medium">{{ d.phone }}</p>
+                  <p class="text-[10px] text-slate-600 truncate w-24">{{ d.home_address }}</p>
+                </div>
+              </div>
+              <div *ngIf="drivers.length === 0" class="p-8 text-center text-slate-500">
+                No drivers found.
+              </div>
+            </div>
+          </section>
+        </ng-container>
+
+        <!-- Tournées (Parcels Management) Section -->
+        <ng-container *ngIf="currentView === 'tournees'">
+          <section class="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden shadow-2xl flex flex-col">
+            <div class="p-6 border-b border-slate-800 flex justify-between items-center bg-slate-900/50">
+              <div class="flex items-center space-x-3">
+                <span class="text-2xl">📦</span>
+                <h3 class="font-bold text-lg">Parcels & Orders Management</h3>
+              </div>
+              <button (click)="showParcelForm = !showParcelForm"
+                      class="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-purple-900/20 active:scale-95">
+                {{ showParcelForm ? 'Cancel' : 'New Parcel' }}
+              </button>
+            </div>
+
+            <!-- Add Parcel Form -->
+            <div *ngIf="showParcelForm" class="p-6 border-b border-slate-800 bg-purple-800/10">
+              <form (ngSubmit)="onSubmitParcel()" #parcelForm="ngForm" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div class="space-y-2">
+                    <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Delivery Address</label>
+                    <div class="flex space-x-2">
+                      <input type="text" [(ngModel)]="newParcel.delivery_address" name="delivery_address" required
+                             (ngModelChange)="onParcelAddressChange($event)"
+                             placeholder="e.g. Grand Place 1, 1000 Brussels"
+                             class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none transition-all">
+                      <button type="button" (click)="onGeocodeParcel()"
+                              class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl border border-slate-700 transition-colors">
+                        🔍
+                      </button>
+                    </div>
+                  </div>
+                  <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-2">
+                      <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Weight (kg)</label>
+                      <input type="number" [(ngModel)]="newParcel.weight_kg" name="weight_kg" required
+                             class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none transition-all">
+                    </div>
+                    <div class="space-y-2">
+                      <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Urgency</label>
+                      <select [(ngModel)]="newParcel.urgency" name="urgency" required
+                              class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none transition-all">
+                        <option *ngFor="let level of urgencyLevels" [value]="level">{{ level }}</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <div class="space-y-2">
+                    <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Latitude</label>
+                    <input type="number" step="any" [(ngModel)]="newParcel.lat" name="lat" required
+                           class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none transition-all">
+                  </div>
+                  <div class="space-y-2">
+                    <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Longitude</label>
+                    <input type="number" step="any" [(ngModel)]="newParcel.lon" name="lon" required
+                           class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none transition-all">
+                  </div>
+                  <div class="space-y-2">
+                    <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Volume (m³ - optional)</label>
+                    <input type="number" step="any" [(ngModel)]="newParcel.length_cm" name="length_cm"
+                           placeholder="cm"
+                           class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none transition-all">
+                  </div>
+                  <div class="flex items-end">
+                    <button type="submit" [disabled]="!parcelForm.form.valid"
+                            class="w-full py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-all shadow-xl shadow-purple-900/10">
+                      Add to Queue
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
+
+            <!-- Parcels List -->
+            <div class="divide-y divide-slate-800 overflow-x-auto">
+              <table class="w-full text-left">
+                <thead class="bg-slate-950/50 text-slate-400 uppercase text-[10px] font-bold tracking-widest">
+                  <tr>
+                    <th class="px-6 py-4">Status</th>
+                    <th class="px-6 py-4">Delivery Address</th>
+                    <th class="px-6 py-4 text-center">Weight</th>
+                    <th class="px-6 py-4 text-center">Urgency</th>
+                    <th class="px-6 py-4">Coordinates</th>
+                    <th class="px-6 py-4 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-800">
+                  <tr *ngFor="let p of parcels" class="hover:bg-slate-800/30 transition-colors group">
+                    <td class="px-6 py-4">
+                      <span [class]="'px-2 py-0.5 rounded-full text-[10px] font-bold ' + 
+                        (p.status === 'PENDING' ? 'bg-amber-500/10 text-amber-500' : 'bg-emerald-500/10 text-emerald-500')">
+                        {{ p.status }}
+                      </span>
+                    </td>
+                    <td class="px-6 py-4 font-medium text-sm text-slate-200">{{ p.delivery_address }}</td>
+                    <td class="px-6 py-4 text-center text-sm">{{ p.weight_kg }} kg</td>
+                    <td class="px-6 py-4 text-center">
+                      <span [class]="'text-[10px] font-bold ' + 
+                        (p.urgency === 'SAME_DAY' ? 'text-rose-400' : p.urgency === 'EXPRESS' ? 'text-amber-400' : 'text-slate-400')">
+                        {{ p.urgency }}
+                      </span>
+                    </td>
+                    <td class="px-6 py-4 text-xs text-slate-500">
+                      {{ p.lat?.toFixed(4) }}, {{ p.lon?.toFixed(4) }}
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                      <button class="p-2 text-slate-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                        🗑️
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <div *ngIf="parcels.length === 0" class="p-12 text-center text-slate-500">
+                <div class="text-4xl mb-3">📦</div>
+                <p>No parcels in the delivery queue.</p>
+              </div>
+            </div>
+          </section>
+        </ng-container>
+
+        <!-- Finances Section -->
+        <ng-container *ngIf="currentView === 'finances'">
+          <section class="bg-slate-900 rounded-2xl border border-slate-800 p-12 text-center shadow-2xl">
+            <div class="text-6xl mb-6">💰📈</div>
+            <h3 class="text-2xl font-bold mb-2">Analyses Financières</h3>
+            <p class="text-slate-500">Suivi des coûts et rentabilité.</p>
+          </section>
+        </ng-container>
       </div>
     </div>
   </main>
